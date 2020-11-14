@@ -10,20 +10,15 @@ function setup(){
     createCanvas(500, 500);
     rectMode(CENTER);
     timestamp_created = Date.now();
-
-    for (let i = 0; i < 40; i++) {
-        for (let j = 0; j < 40; j++) {
-            agents.push(new BubbleAgent(4 + 10 * i, 4 + 10 * j, 8));            
-        }
-    }
+    frameRate(60);
 }
 
 function draw(){
-    background(120);
+    // background(120);
     for (let i = 0; i < agents.length; i++) {
         const agent = agents[i];
-        agent.move();
-        agent.show();        
+        // agent.move();
+        // agent.show();        
     }
     if (shapePreview != null) {
         shapePreview.showPreview();
