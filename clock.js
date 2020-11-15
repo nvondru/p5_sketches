@@ -4,12 +4,14 @@ let tickSound;
 let tickFilter;
 
 let speedModifier = 1;
+let p5Framerate = 60;
 
 let soundEnabled = false;
 let clickedX;
 let clickedY;
+let currentTime;
 
-let clockPreview;
+let tempClock;
 
 function preload() {
   soundFormats("mp3", "ogg");
@@ -23,7 +25,7 @@ function setup() {
   canvas.mouseReleased(canvasMouseReleased);
   angleMode(DEGREES);
   rectMode(CENTER);
-  frameRate(60);
+  frameRate(p5Framerate);
   tickFilter = new p5.LowPass();
   tickFilter.freq(2000);
   tickSound.amp(0.1 / (speedModifier * 0.5));
@@ -36,44 +38,41 @@ function draw() {
     clocks[i].tick();
   }
 
-  if (clickMode == "create") {
+  if (clickMode == CLICK_MODES.create) {
     push();
-
-    let currentHours = new Date().getHours();
-    let currentMinutes = new Date().getMinutes();
-    let currentSeconds = new Date().getSeconds();
-
-    tempClock = new Clock(
-      clickedX,
-      clickedY,
-      Math.abs(mouseX - clickedX),
-      currentHours,
-      currentMinutes,
-      currentSeconds
-    );
+    tempClock.preview();
     pop();
   }
 }
 
 function canvasMousePressed() {
-  if (clickMode == "definePosition") {
-    clickedX = mouseX;
-    clickedY = mouseY;
+  if (clickMode == CLICK_MODES.definePosition) {
     clickMode = CLICK_MODES.create;
+
+    if (clocks.length === 0) {
+      currentTime =
+        new Date().getHours() * 3600 +
+        new Date().getMinutes() * 60 +
+        new Date().getSeconds();
+    }
+
+    tempClock = new Clock(mouseX, mouseY, 0, currentTime);
   }
 }
 
 function canvasMouseReleased() {
-  clickMode = CLICK_MODES.default;
-  clocks.push(tempClock);
+  if (clickMode === CLICK_MODES.create) {
+    clickMode = CLICK_MODES.default;
+    clocks.push(tempClock);
+    tempClock = {};
+  }
 }
 class Clock {
-  constructor(x, y, size, initialHours, initialMinutes, initialSeconds) {
+  constructor(x, y, size, initialTime) {
     this.x = x;
     this.y = y;
     this.size = size;
-    this.initialTime =
-      initialHours * 3600 + initialMinutes * 60 + initialSeconds;
+    this.initialTime = initialTime;
 
     // this.hourTicks = [];
     // this.minuteTicks = [];
@@ -101,6 +100,14 @@ class Clock {
       "second",
       this.initialTime
     );
+    this.tick();
+  }
+
+  preview() {
+    this.size = abs(mouseX - this.x) * 2;
+    this.secondPointer.scaleSize(this.size * 0.5, this.size / 100);
+    this.minutePointer.scaleSize(this.size * 0.4, this.size / 60);
+    this.hourPointer.scaleSize(this.size * 0.25, this.size / 30);
     this.tick();
   }
 
@@ -157,32 +164,44 @@ class ClockPointer {
     }
   }
 
+  scaleSize(newLength, newWidth) {
+    this.length = newLength;
+    this.width = newWidth;
+  }
+
   draw() {
     push();
     noStroke();
     fill(255);
     rotate(this.angle);
     rect(0, 0 - this.length / 2, this.width, this.length);
-    if (
-      frameCount != 0 &&
-      frameCount % (60 / speedModifier) == 0 &&
-      this.pointerMode === "second"
-    ) {
-      this.angle += 360 / 60;
-      tickSound.disconnect();
 
-      if (frameCount % (120 / speedModifier) === 0) {
-        tickSound.connect(tickFilter);
-      } else {
-        tickSound.connect();
-      }
-      if (soundEnabled === true) {
-        tickSound.play();
-      }
+    // if (
+    //   frameCount != 0 &&
+    //   frameCount % (60 / speedModifier) == 0 &&
+    //   this.pointerMode === "second"
+    // ) {
+    // // if (speedModifier >= p5Framerate) {
+    // //   this.angle += 360 / (60 * speedModifier);
+    // // } else {
+    // this.angle += 360 / 60;
+    // // }
+    // tickSound.disconnect();
+
+    // if (frameCount % 2 != 0) {
+    //   tickSound.connect(tickFilter);
+    // } else {
+    //   tickSound.connect();
+    // }
+    // if (soundEnabled === true) {
+    //   tickSound.play();
+    // }
+    if (frameCount != 0 && this.pointerMode === "second") {
+      this.angle += (360 / (p5Framerate * 60)) * speedModifier;
     } else if (this.pointerMode === "minute") {
-      this.angle += 360 / (216000 / speedModifier);
+      this.angle += (360 / (p5Framerate * 3600)) * speedModifier;
     } else if (this.pointerMode === "hour") {
-      this.angle += 360 / (12960000 / speedModifier);
+      this.angle += (360 / (p5Framerate * 216000)) * speedModifier;
     }
     pop();
   }

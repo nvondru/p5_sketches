@@ -11,14 +11,19 @@ html {
   width: 100vw;
   height: 100vh;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
+}
+
+#p5Container {
+  margin-left: 20px;
 }
 
 #inputContainer {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  margin-right: 20px;
 }
 
 input {
@@ -56,4 +61,43 @@ input:active {
 
 .messageBox--inactive {
   opacity: 0;
+}
+
+.value {
+  border-bottom: 4px dashed #bdc3c7;
+  text-align: center;
+  font-weight: bold;
+  font-size: 5em;
+  width: 300px;
+  height: 100px;
+  line-height: 60px;
+  margin: 40px auto;
+  letter-spacing: -0.07em;
+  text-shadow: white 2px 2px 2px;
+}
+input[type="range"] {
+  display: block;
+  -webkit-appearance: none;
+  background-color: #ffffff;
+  width: 300px;
+  height: 5px;
+  border-radius: 5px;
+  margin: 0 auto;
+  outline: 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  background-color: black;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+}
+​ input[type="range"]::-webkit-slider-thumb:hover {
+  background-color: white;
+  border: 2px solid #e74c3c;
+}
+input[type="range"]::-webkit-slider-thumb:active {
+  transform: scale(1.3);
 }

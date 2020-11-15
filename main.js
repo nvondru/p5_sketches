@@ -17,7 +17,11 @@ class ClockPageController {
     this.btnToggleSound = document.getElementById("btn_toggleSound");
     this.btnAddWatch = document.getElementById("btn_addWatch");
     this.btnClearCanvas = document.getElementById("btn_clearCanvas");
+    this.rangeSpeedModifier = document.getElementById("range_speedModifier");
+    this.lblSpeedModifier = document.getElementById("lbl_speedModifier");
+
     this.registerButtonListeners();
+    this.registerRangeListeners();
     this.messageTimeout = setTimeout(() => {}, 0);
   }
 
@@ -40,8 +44,25 @@ class ClockPageController {
     });
 
     this.btnClearCanvas.addEventListener("click", (event) => {
-      this.displayInfoMessage("Cleared all watched.", 3000);
+      this.displayInfoMessage("Cleared all watches.", 3000);
       clocks = [];
+    });
+  }
+
+  registerRangeListeners() {
+    this.rangeSpeedModifier.addEventListener("mouseup", (event) => {
+      let adjustedValue = this.rangeSpeedModifier.value;
+
+      while ((p5Framerate % (p5Framerate / adjustedValue)) % 1 != 0) {
+        adjustedValue -= 1;
+      }
+
+      speedModifier = adjustedValue;
+      this.lblSpeedModifier.innerHTML = adjustedValue;
+    });
+
+    this.rangeSpeedModifier.addEventListener("input", (event) => {
+      this.lblSpeedModifier.innerHTML = this.rangeSpeedModifier.value;
     });
   }
 
