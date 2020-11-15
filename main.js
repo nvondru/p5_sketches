@@ -4,6 +4,9 @@ const CLICK_MODES = {
   default: "default",
   create: "create",
   definePosition: "definePosition",
+  grab: "grab",
+  scale: "scale",
+  scale: "duplicate",
 };
 let clickMode = CLICK_MODES.default;
 

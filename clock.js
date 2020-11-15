@@ -3,10 +3,13 @@ let clocks = [];
 let speedModifier = 1;
 let p5Framerate = 60;
 
-let tempClock;
+let activeClock = {};
 let clickedX;
 let clickedY;
 let currentTime;
+
+let lastX;
+let lastY;
 
 function setup() {
   let canvas = createCanvas(800, 800);
@@ -25,7 +28,7 @@ function draw() {
   background(255);
   noFill();
   stroke(0);
-  strokeWeight(10);
+  strokeWeight(4);
   rect(width / 2, height / 2, width, height);
 
   clockPageController.updateActualFrameRateDisplay(
@@ -40,22 +43,62 @@ function draw() {
 
   // clickMode equals "create" once the user hits the "Add Clock" button and then clicks within the canvas
   if (clickMode == CLICK_MODES.create) {
-    tempClock.preview();
+    activeClock.preview();
+  } else if (clickMode == CLICK_MODES.grab && activeClock != {}) {
+    activeClock.translate(mouseX - lastX, mouseY - lastY);
+  } else if (clickMode == CLICK_MODES.scale && activeClock != {}) {
+    activeClock.scale(activeClock.size + (mouseX - lastX) * 2);
+  } else if (clickMode == CLICK_MODES.duplicate && activeClock != {}) {
+    let duplicatedClock = new Clock(
+      activeClock.x,
+      activeClock.y,
+      activeClock.size,
+      currentTime
+    );
+    duplicatedClock.translate(mouseX - lastX, mouseY - lastY);
+    activeClock = duplicatedClock;
   }
+
+  // homebrewed implementation in order to calculate distance between current mouseX and lastX (somehow movedX doesn't work properly?)
+  lastX = mouseX;
+  lastY = mouseY;
 }
 
 function canvasMousePressed() {
+  for (let i = clocks.length - 1; i >= 0; i--) {
+    const clock = clocks[i];
+    if (clock.size / 2 >= dist(clock.x, clock.y, mouseX, mouseY)) {
+      activeClock = clock;
+      break;
+    }
+  }
+
   if (clickMode == CLICK_MODES.definePosition) {
     createClock();
+  } else if (clickMode == CLICK_MODES.default) {
+    if (activeClock != {}) {
+      if (keyIsDown(SHIFT)) {
+        clickMode = CLICK_MODES.scale;
+      } else if (keyIsDown(ALT)) {
+        clickMode = CLICK_MODES.duplicate;
+      } else {
+        clickMode = CLICK_MODES.grab;
+      }
+    }
   }
 }
 
 function canvasMouseReleased() {
-  if (clickMode === CLICK_MODES.create) {
-    clickMode = CLICK_MODES.default;
-    clocks.push(tempClock);
-    tempClock = {};
+  if (clickMode === CLICK_MODES.create || clickMode == CLICK_MODES.duplicate) {
+    clocks.push(activeClock);
+    clockPageController.displayInfoMessage(
+      "Drag on any watch to move it. Shift + drag to scale. Alt + drag to duplicate.",
+      10000
+    );
   }
+  clickMode = CLICK_MODES.default;
+
+  activeClock = {};
 }
 
 function createClock() {
@@ -66,7 +109,7 @@ function createClock() {
       new Date().getMinutes() * 60 +
       new Date().getSeconds();
   }
-  tempClock = new Clock(mouseX, mouseY, 0, currentTime);
+  activeClock = new Clock(mouseX, mouseY, 0, currentTime);
 }
 class Clock {
   constructor(x, y, size, initialTime) {
@@ -105,11 +148,20 @@ class Clock {
   }
 
   preview() {
-    this.size = abs(mouseX - this.x) * 2;
+    this.scale(abs(mouseX - this.x) * 2);
+    this.tick();
+  }
+
+  translate(x, y) {
+    this.x += x;
+    this.y += y;
+  }
+
+  scale(scaledSize) {
+    this.size = scaledSize;
     this.secondPointer.scaleSize(this.size * 0.5, this.size / 100);
     this.minutePointer.scaleSize(this.size * 0.4, this.size / 60);
     this.hourPointer.scaleSize(this.size * 0.25, this.size / 30);
-    this.tick();
   }
 
   tick() {
@@ -146,6 +198,10 @@ class Clock {
       rect(-this.size / 2 + this.size / 56, 0, this.size / 26, this.size / 52);
       rotate(360 / 60);
     }
+  }
+
+  toString() {
+    return "Clock[x=" + this.x + "; y=" + this.y + "; size=" + this.size + "]";
   }
 }
 
