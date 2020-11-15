@@ -25,14 +25,21 @@ function setup() {
   canvas.mouseReleased(canvasMouseReleased);
   angleMode(DEGREES);
   rectMode(CENTER);
-  frameRate(p5Framerate);
   tickFilter = new p5.LowPass();
   tickFilter.freq(2000);
   tickSound.amp(0.1 / (speedModifier * 0.5));
 }
 
 function draw() {
-  background(120);
+  background(255);
+  noFill();
+  stroke(0);
+  strokeWeight(10);
+  rect(width / 2, height / 2, width, height);
+  frameRate(p5Framerate);
+  clockPageController.updateActualFrameRateDisplay(
+    Math.round(p5Framerate * (1 / (p5Framerate * (deltaTime / 1000))))
+  );
 
   for (let i = 0; i < clocks.length; i++) {
     clocks[i].tick();
@@ -176,32 +183,12 @@ class ClockPointer {
     rotate(this.angle);
     rect(0, 0 - this.length / 2, this.width, this.length);
 
-    // if (
-    //   frameCount != 0 &&
-    //   frameCount % (60 / speedModifier) == 0 &&
-    //   this.pointerMode === "second"
-    // ) {
-    // // if (speedModifier >= p5Framerate) {
-    // //   this.angle += 360 / (60 * speedModifier);
-    // // } else {
-    // this.angle += 360 / 60;
-    // // }
-    // tickSound.disconnect();
-
-    // if (frameCount % 2 != 0) {
-    //   tickSound.connect(tickFilter);
-    // } else {
-    //   tickSound.connect();
-    // }
-    // if (soundEnabled === true) {
-    //   tickSound.play();
-    // }
     if (frameCount != 0 && this.pointerMode === "second") {
-      this.angle += (360 / (p5Framerate * 60)) * speedModifier;
+      this.angle += (360 / (getFrameRate() * 60)) * speedModifier;
     } else if (this.pointerMode === "minute") {
-      this.angle += (360 / (p5Framerate * 3600)) * speedModifier;
+      this.angle += (360 / (getFrameRate() * 3600)) * speedModifier;
     } else if (this.pointerMode === "hour") {
-      this.angle += (360 / (p5Framerate * 216000)) * speedModifier;
+      this.angle += (360 / (getFrameRate() * 216000)) * speedModifier;
     }
     pop();
   }

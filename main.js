@@ -14,11 +14,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
 
 class ClockPageController {
   constructor() {
-    this.btnToggleSound = document.getElementById("btn_toggleSound");
     this.btnAddWatch = document.getElementById("btn_addWatch");
     this.btnClearCanvas = document.getElementById("btn_clearCanvas");
     this.rangeSpeedModifier = document.getElementById("range_speedModifier");
     this.lblSpeedModifier = document.getElementById("lbl_speedModifier");
+    this.rangeP5Framerate = document.getElementById("range_p5Framerate");
+    this.lblP5Framerate = document.getElementById("lbl_p5Framerate");
+    this.lblActualFramerate = document.getElementById("lbl_actualFramerate");
 
     this.registerButtonListeners();
     this.registerRangeListeners();
@@ -26,18 +28,9 @@ class ClockPageController {
   }
 
   registerButtonListeners() {
-    this.btnToggleSound.addEventListener("click", (event) => {
-      soundEnabled = !soundEnabled;
-      if (soundEnabled === true) {
-        this.displayInfoMessage("Sound enabled", 2000);
-      } else {
-        this.displayInfoMessage("Sound disabled", 2000);
-      }
-    });
-
     this.btnAddWatch.addEventListener("click", (event) => {
       this.displayInfoMessage(
-        "Click and drag in the gray canvas to create a new watch.",
+        "Click and drag within the black rectangle to create a new watch.",
         3000
       );
       clickMode = CLICK_MODES.definePosition;
@@ -50,19 +43,14 @@ class ClockPageController {
   }
 
   registerRangeListeners() {
-    this.rangeSpeedModifier.addEventListener("mouseup", (event) => {
-      let adjustedValue = this.rangeSpeedModifier.value;
-
-      while ((p5Framerate % (p5Framerate / adjustedValue)) % 1 != 0) {
-        adjustedValue -= 1;
-      }
-
-      speedModifier = adjustedValue;
-      this.lblSpeedModifier.innerHTML = adjustedValue;
-    });
-
     this.rangeSpeedModifier.addEventListener("input", (event) => {
       this.lblSpeedModifier.innerHTML = this.rangeSpeedModifier.value;
+      speedModifier = this.rangeSpeedModifier.value;
+    });
+
+    this.rangeP5Framerate.addEventListener("input", (event) => {
+      this.lblP5Framerate.innerHTML = this.rangeP5Framerate.value;
+      p5Framerate = Number(this.rangeP5Framerate.value);
     });
   }
 
@@ -75,5 +63,9 @@ class ClockPageController {
       messageBox.classList.remove("messageBox--active");
       messageBox.classList.add("messageBox--inactive");
     }, duration);
+  }
+
+  updateActualFrameRateDisplay(value) {
+    this.lblActualFramerate.innerHTML = value;
   }
 }

@@ -22,18 +22,37 @@
     <div id="messageBox" class="messageBox--inactive">Test</div>
     <div id="mainContainer">
       <div id="inputContainer">
-        <input id="btn_toggleSound" type="button" value="Toggle Sound" />
-        <input id="btn_addWatch" type="button" value="Add Watch" />
-        <input id="btn_clearCanvas" type="button" value="Clear Canvas" />
+        <input id="btn_addWatch" class="btn" type="button" value="Add Watch" />
+        <input
+          id="btn_clearCanvas"
+          class="btn"
+          type="button"
+          value="Clear Canvas"
+        />
         <div id="lbl_speedModifier" class="value">1</div>
         <input
           id="range_speedModifier"
           type="range"
           min="1"
-          max="240"
+          max="20000"
           step="1"
           value="1"
         />
+        <div id="framerateContainer">
+          <div class="value">
+            <div id="lbl_p5Framerate">60</div>
+            <div>/</div>
+            <div id="lbl_actualFramerate">60</div>
+          </div>
+          <input
+            id="range_p5Framerate"
+            type="range"
+            min="1"
+            max="240"
+            step="1"
+            value="60"
+          />
+        </div>
       </div>
       <div id="p5Container"></div>
     </div>
