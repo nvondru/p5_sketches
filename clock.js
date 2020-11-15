@@ -1,22 +1,12 @@
 let clocks = [];
 
-let tickSound;
-let tickFilter;
-
 let speedModifier = 1;
 let p5Framerate = 60;
 
-let soundEnabled = false;
+let tempClock;
 let clickedX;
 let clickedY;
 let currentTime;
-
-let tempClock;
-
-function preload() {
-  soundFormats("mp3", "ogg");
-  tickSound = loadSound("./assets/tickSound");
-}
 
 function setup() {
   let canvas = createCanvas(800, 800);
@@ -25,45 +15,38 @@ function setup() {
   canvas.mouseReleased(canvasMouseReleased);
   angleMode(DEGREES);
   rectMode(CENTER);
-  tickFilter = new p5.LowPass();
-  tickFilter.freq(2000);
-  tickSound.amp(0.1 / (speedModifier * 0.5));
 }
 
 function draw() {
+  // update framerate (could have changed by slider input)
+  frameRate(p5Framerate);
+
+  // draw canvas background
   background(255);
   noFill();
   stroke(0);
   strokeWeight(10);
   rect(width / 2, height / 2, width, height);
-  frameRate(p5Framerate);
+
   clockPageController.updateActualFrameRateDisplay(
+    // alternative to p5's getFrameRate() function
     Math.round(p5Framerate * (1 / (p5Framerate * (deltaTime / 1000))))
   );
 
+  // update existing clocks
   for (let i = 0; i < clocks.length; i++) {
     clocks[i].tick();
   }
 
+  // clickMode equals "create" once the user hits the "Add Clock" button and then clicks within the canvas
   if (clickMode == CLICK_MODES.create) {
-    push();
     tempClock.preview();
-    pop();
   }
 }
 
 function canvasMousePressed() {
   if (clickMode == CLICK_MODES.definePosition) {
-    clickMode = CLICK_MODES.create;
-
-    if (clocks.length === 0) {
-      currentTime =
-        new Date().getHours() * 3600 +
-        new Date().getMinutes() * 60 +
-        new Date().getSeconds();
-    }
-
-    tempClock = new Clock(mouseX, mouseY, 0, currentTime);
+    createClock();
   }
 }
 
@@ -73,6 +56,17 @@ function canvasMouseReleased() {
     clocks.push(tempClock);
     tempClock = {};
   }
+}
+
+function createClock() {
+  clickMode = CLICK_MODES.create;
+  if (clocks.length === 0) {
+    currentTime =
+      new Date().getHours() * 3600 +
+      new Date().getMinutes() * 60 +
+      new Date().getSeconds();
+  }
+  tempClock = new Clock(mouseX, mouseY, 0, currentTime);
 }
 class Clock {
   constructor(x, y, size, initialTime) {
